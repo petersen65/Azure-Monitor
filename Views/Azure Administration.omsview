@@ -1,0 +1,214 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "resourcegroup": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "subscriptionId": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "workspace": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "workspaceapiversion": {
+      "type": "string",
+      "defaultValue": ""
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "[parameters('workspaceapiversion')]",
+      "name": "[parameters('workspace')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "location": "[parameters('location')]",
+      "id": "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]",
+      "resources": [
+        {
+          "apiVersion": "2015-11-01-preview",
+          "name": "Azure Administration",
+          "type": "views",
+          "location": "[parameters('location')]",
+          "id": "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'),'/views/Azure Administration')]",
+          "dependson": [
+            "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]"
+          ],
+          "properties": {
+            "Id": "Azure Administration",
+            "Name": "Azure Administration",
+            "Author": null,
+            "Source": "Local",
+            "Version": 2,
+            "Dashboard": [
+              {
+                "Id": "LineChartCalloutStackedBuilderBlade",
+                "Type": "Blade",
+                "Version": 0,
+                "Configuration": {
+                  "General": {
+                    "title": "Azure Administration",
+                    "newGroup": false
+                  },
+                  "charts": [
+                    {
+                      "Header": {
+                        "Title": "Number of Heartbeat Events over Time",
+                        "Subtitle": ""
+                      },
+                      "LineChart": {
+                        "Query": "Heartbeat | where Computer in (AzureAdministration_ComputerGroup) | summarize Count = count() by Computer, bin(TimeGenerated, 15min) ",
+                        "yAxis": {
+                          "isLogarithmic": false,
+                          "units": {
+                            "baseUnitType": "Count",
+                            "baseUnit": "Ones",
+                            "displayUnit": "AUTO"
+                          },
+                          "customLabel": ""
+                        },
+                        "NavigationSelect": {}
+                      }
+                    },
+                    {
+                      "Header": {
+                        "Title": "Disk Transfers per Sec over Time",
+                        "Subtitle": ""
+                      },
+                      "LineChart": {
+                        "Query": "Perf | where TimeGenerated >= ago(24h) and Computer in (AzureAdministration_ComputerGroup) | where ObjectName contains \"Logical\" and ObjectName contains \"Disk\" and InstanceName == \"_Total\" and CounterName == \"Disk Transfers/sec\" | summarize Transfer = avg(CounterValue) by Computer, Time = bin(TimeGenerated, 15min) ",
+                        "yAxis": {
+                          "isLogarithmic": false,
+                          "units": {
+                            "baseUnitType": "Count",
+                            "baseUnit": "Ones",
+                            "displayUnit": "Ones"
+                          },
+                          "customLabel": ""
+                        },
+                        "NavigationSelect": {}
+                      }
+                    },
+                    {
+                      "Header": {
+                        "Title": "Processor Utilization over Time",
+                        "Subtitle": ""
+                      },
+                      "LineChart": {
+                        "Query": "Perf | where Computer in (AzureAdministration_ComputerGroup) | where ObjectName == \"Processor\" and CounterName == \"% Processor Time\" | summarize AverageUtilization = avg(CounterValue) by Computer, Time = bin(TimeGenerated, 1h)",
+                        "yAxis": {
+                          "isLogarithmic": false,
+                          "units": {
+                            "baseUnitType": "Percentage",
+                            "baseUnit": "ZeroToOne",
+                            "displayUnit": "ZeroToOne"
+                          },
+                          "customLabel": "Utilization"
+                        },
+                        "NavigationSelect": {}
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "Id": "LineChartBuilderBlade",
+                "Type": "Blade",
+                "Version": 0,
+                "Configuration": {
+                  "General": {
+                    "title": "Event Type Distribution",
+                    "newGroup": false,
+                    "icon": "",
+                    "useIcon": false
+                  },
+                  "Header": {
+                    "Title": "Azure Administration Events over Time",
+                    "Subtitle": ""
+                  },
+                  "LineChart": {
+                    "Query": "search * | where Computer in (AzureAdministration_ComputerGroup) | summarize AggregatedValue = count() by Type",
+                    "yAxis": {
+                      "isLogarithmic": true,
+                      "units": {
+                        "baseUnitType": "",
+                        "baseUnit": "",
+                        "displayUnit": ""
+                      },
+                      "customLabel": "Count"
+                    },
+                    "NavigationSelect": {}
+                  },
+                  "List": {
+                    "Query": "search * | where Computer in (AzureAdministration_ComputerGroup) | summarize AggregatedValue = count() by Type",
+                    "HideGraph": false,
+                    "enableSparklines": true,
+                    "operation": "Summary",
+                    "ColumnsTitle": {
+                      "Name": "Event Type",
+                      "Value": "Count"
+                    },
+                    "Color": "#00188f",
+                    "thresholds": {
+                      "isEnabled": false,
+                      "values": [
+                        {
+                          "name": "Normal",
+                          "threshold": "Default",
+                          "color": "#009e49",
+                          "isDefault": true
+                        },
+                        {
+                          "name": "Warning",
+                          "threshold": "60",
+                          "color": "#fcd116",
+                          "isDefault": false
+                        },
+                        {
+                          "name": "Error",
+                          "threshold": "90",
+                          "color": "#ba141a",
+                          "isDefault": false
+                        }
+                      ]
+                    },
+                    "NameDSVSeparator": "",
+                    "NavigationQuery": "search {selected item} | where Computer in (AzureAdministration_ComputerGroup) | sort by TimeGenerated desc",
+                    "NavigationSelect": {
+                      "NavigationQuery": "search {selected item} | where Computer in (AzureAdministration_ComputerGroup) | sort by TimeGenerated desc"
+                    }
+                  }
+                }
+              }
+            ],
+            "Filters": [],
+            "OverviewTile": {
+              "Id": "SingleNumberBuilderTile",
+              "Type": "OverviewTile",
+              "Version": 2,
+              "Configuration": {
+                "Tile": {
+                  "Legend": "Computers with Heartbeats",
+                  "Query": "AzureAdministration_ComputerGroup | count "
+                },
+                "Advanced": {
+                  "DataFlowVerification": {
+                    "Enabled": false,
+                    "Query": "search * | limit 1 | project TimeGenerated",
+                    "Message": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

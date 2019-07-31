@@ -1,0 +1,335 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "A valid Log Analytics workspace name"
+      }
+    },
+    "accountName": {
+      "type": "string",
+      "metadata": {
+        "description": "A valid Azure Automation account name"
+      }
+    },
+    "workspaceRegionId": {
+      "type": "string",
+      "metadata": {
+        "description": "Region of the Log Analytics workspace"
+      }
+    },
+    "regionId": {
+      "type": "string",
+      "metadata": {
+        "description": "Region of the Azure Automation account"
+      }
+    },
+    "pricingTier": {
+      "type": "string",
+      "metadata": {
+        "description": "Pricing tier of both Log Analytics workspace and Azure Automation account"
+      }
+    },
+    "workspaceId": {
+      "type": "securestring",
+      "metadata": {
+        "description": "A valid Log Analytics workspace id"
+      }
+    },
+    "workspaceKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "A valid Log Analytics workspace key"
+      }
+    },
+    "collectedResourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "A valid Azure Resource Group name for collecting automation job logs"
+      }
+    },
+    "collectedAutomationAccount": {
+      "type": "string",
+      "metadata": {
+        "description": "A valid Azure Automation account name for collecting automation job logs"
+      }
+    },
+    "scheduleStartTime": {
+      "type": "string",
+      "defaultValue": "2019-12-31T23:59:59+01:00",
+      "metadata": {
+        "description": "Start time for schedule"
+      }
+    },
+    "scheduleTimeZone": {
+      "type": "string",
+      "defaultValue": "Europe/Berlin",
+      "metadata": {
+        "description": "Time zone for schedule"
+      }
+    },
+    "scheduleLinkGuid": {
+      "type": "string",
+      "defaultValue": "[newGuid()]",
+      "metadata": {
+        "description": "GUID for the schedule link to runbook",
+        "control": "guid"
+      }
+    },
+    "runbookJobGuid": {
+      "type": "string",
+      "defaultValue": "[newGuid()]",
+      "metadata": {
+        "description": "GUID for the runbook job",
+        "control": "guid"
+      }
+    }
+  },
+  "variables": {
+    "LogAnalyticsApiVersion": "2015-11-01-preview",
+    "AutomationApiVersion": "2015-10-31",
+
+    "Solution": {
+      "Deploy": true,
+      "Name": "MyCollectorSolution",
+      "Version": "1.1",
+      "Publisher": "Contoso",
+      "Product": "CollectorSolution"
+    },
+
+    "WorkspaceId": {
+      "Deploy": true,
+      "Name": "WorkspaceId",
+      "Description": "Workspace ID of the Log Analytics workspace",
+      "Encrypted": false,
+      "Value": "[concat('\"', parameters('workspaceId'), '\"')]"
+    },
+
+    "WorkspaceKey": {
+      "Deploy": true,
+      "Name": "WorkspaceKey",
+      "Description": "Primary or Secondary Key of the Log Analytics workspace",
+      "Encrypted": true,
+      "Value": "[concat('\"', parameters('workspaceKey'), '\"')]"
+    },
+
+    "Module": {
+      "Deploy": true,
+      "Name": "OMSIngestionAPI",
+      "Uri": "https://psg-prod-eastus.azureedge.net/packages/omsingestionapi.1.6.0.nupkg"
+    },
+
+    "Schedule": {
+      "Deploy": true,
+      "Name": "Collect-AutomationJobs",
+      "Description": "Hourly schedule for runbook Collect-AutomationJobs",
+      "IsEnabled": "true",
+      "Interval": "1",
+      "Frequency": "hour",
+      "StartTime": "[parameters('scheduleStartTime')]",
+      "TimeZone": "[parameters('scheduleTimeZone')]",
+      "LinkGuid": "[parameters('scheduleLinkGuid')]"
+    },
+
+    "Runbook": {
+      "Deploy": true,
+      "Name": "Collect-AutomationJobs",
+      "Description": "Gets automation jobs from the past hour and writes them to Log Analytics",
+      "Type": "PowerShell",
+      "Uri": "https://raw.githubusercontent.com/petersen65/Petersen/master/Collect-AutomationJobs.ps1",
+      "JobGuid": "[parameters('runbookJobGuid')]"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[variables('Solution').Deploy]",
+      "name": "[concat(variables('Solution').Name, '[' ,parameters('workspaceName'), ']')]",
+      "location": "[parameters('workspaceRegionId')]",
+      "tags": {
+        "displayName": "Solution"
+      },
+      "type": "Microsoft.OperationsManagement/solutions",
+      "apiVersion": "[variables('LogAnalyticsApiVersion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts/variables/', parameters('accountName'), variables('WorkspaceId').Name)]",
+        "[resourceId('Microsoft.Automation/automationAccounts/variables/', parameters('accountName'), variables('WorkspaceKey').Name)]",
+        "[resourceId('Microsoft.Automation/automationAccounts/modules/', parameters('accountName'), variables('Module').Name)]",
+        "[resourceId('Microsoft.Automation/automationAccounts/schedules/', parameters('accountName'), variables('Schedule').Name)]",
+        "[resourceId('Microsoft.Automation/automationAccounts/runbooks/', parameters('accountName'), variables('Runbook').Name)]",
+        "[resourceId('Microsoft.Automation/automationAccounts/jobs/', parameters('accountName'), variables('Runbook').JobGuid)]",
+        "[resourceId('Microsoft.Automation/automationAccounts/jobSchedules/', parameters('accountName'), variables('Schedule').LinkGuid)]"
+      ],
+      "properties": {
+        "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "referencedResources": [
+          "[resourceId('Microsoft.Automation/automationAccounts/modules/', parameters('accountName'), variables('Module').Name)]",
+          "[resourceId('Microsoft.Automation/automationAccounts/jobs/', parameters('accountName'), variables('Runbook').JobGuid)]"
+        ],
+        "containedResources": [
+          "[resourceId('Microsoft.Automation/automationAccounts/variables/', parameters('accountName'), variables('WorkspaceId').Name)]",
+          "[resourceId('Microsoft.Automation/automationAccounts/variables/', parameters('accountName'), variables('WorkspaceKey').Name)]",
+          "[resourceId('Microsoft.Automation/automationAccounts/schedules/', parameters('accountName'), variables('Schedule').Name)]",
+          "[resourceId('Microsoft.Automation/automationAccounts/runbooks/', parameters('accountName'), variables('Runbook').Name)]",
+          "[resourceId('Microsoft.Automation/automationAccounts/jobSchedules/', parameters('accountName'), variables('Schedule').LinkGuid)]"
+        ]
+      },
+      "plan": {
+        "name": "[concat(variables('Solution').Name, '[' ,parameters('workspaceName'), ']')]",
+        "Version": "[variables('Solution').Version]",
+        "product": "[variables('Solution').Product]",
+        "publisher": "[variables('Solution').Publisher]",
+        "promotionCode": ""
+      }
+    },
+    {
+      "condition": "[variables('WorkspaceId').Deploy]",
+      "name": "[concat(parameters('accountName'), '/', variables('WorkspaceId').Name)]",
+      "type": "microsoft.automation/automationAccounts/variables",
+      "apiVersion": "[variables('AutomationApiVersion')]",
+      "tags": {
+        "displayName": "WorkspaceId"
+      },
+      "dependsOn": [
+      ],
+      "properties": {
+        "description": "[variables('WorkspaceId').Description]",
+        "isEncrypted": "[variables('WorkspaceId').Encrypted]",
+        "value": "[variables('WorkspaceId').Value]"
+      }
+    },
+    {
+      "condition": "[variables('WorkspaceKey').Deploy]",
+      "name": "[concat(parameters('accountName'), '/', variables('WorkspaceKey').Name)]",
+      "type": "microsoft.automation/automationAccounts/variables",
+      "apiVersion": "[variables('AutomationApiVersion')]",
+      "tags": {
+        "displayName": "WorkspaceKey"
+      },
+      "dependsOn": [
+      ],
+      "properties": {
+        "description": "[variables('WorkspaceKey').Description]",
+        "isEncrypted": "[variables('WorkspaceKey').Encrypted]",
+        "value": "[variables('WorkspaceKey').Value]"
+      }
+    },
+    {
+      "condition": "[variables('Module').Deploy]",
+      "name": "[concat(parameters('accountName'), '/', variables('Module').Name)]",
+      "type": "Microsoft.Automation/automationAccounts/modules",
+      "apiVersion": "[variables('AutomationApiVersion')]",
+      "tags": {
+        "displayName": "Module"
+      },
+      "dependsOn": [
+      ],
+      "properties": {
+        "contentLink": {
+          "uri": "[variables('Module').Uri]"
+        }
+      }
+    },
+    {
+      "condition": "[variables('Schedule').Deploy]",
+      "name": "[concat(parameters('accountName'), '/', variables('Schedule').Name)]",
+      "type": "microsoft.automation/automationAccounts/schedules",
+      "apiVersion": "[variables('AutomationApiVersion')]",
+      "tags": {
+        "displayName": "Schedule"
+      },
+      "dependsOn": [
+      ],
+      "properties": {
+        "description": "[variables('Schedule').Description]",
+        "startTime": "[variables('Schedule').StartTime]",
+        "timeZone": "[variables('Schedule').TimeZone]",
+        "isEnabled": "[variables('Schedule').IsEnabled]",
+        "interval": "[variables('Schedule').Interval]",
+        "frequency": "[variables('Schedule').Frequency]"
+      }
+    },
+    {
+      "condition": "[variables('Runbook').Deploy]",
+      "name": "[concat(parameters('accountName'), '/', variables('Runbook').Name)]",
+      "type": "Microsoft.Automation/automationAccounts/runbooks",
+      "apiVersion": "[variables('AutomationApiVersion')]",
+      "tags": {
+        "displayName": "Runbook"
+      },
+      "dependsOn": [
+      ],
+      "location": "[parameters('regionId')]",
+      "properties": {
+        "runbookType": "[variables('Runbook').Type]",
+        "logProgress": "true",
+        "logVerbose": "true",
+        "description": "[variables('Runbook').Description]",
+        "publishContentLink": {
+          "uri": "[variables('Runbook').Uri]",
+          "version": "1.0.0.0"
+        }
+      }
+    },
+    {
+      "condition": "[variables('Runbook').Deploy]",
+      "name": "[concat(parameters('accountName'), '/', variables('Runbook').JobGuid)]",
+      "type": "Microsoft.Automation/automationAccounts/jobs",
+      "apiVersion": "[variables('AutomationApiVersion')]",
+      "location": "[parameters('regionId')]",
+      "tags": {
+        "displayName": "AutostartJob"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts/runbooks/', parameters('accountName'), variables('Runbook').Name)]",
+        "[resourceId('Microsoft.Automation/automationAccounts/modules/', parameters('accountName'), variables('Module').Name)]"
+      ],
+      "properties": {
+        "runbook": {
+          "name": "[variables('Runbook').Name]"
+        },
+        "parameters": {
+          "resourceGroupName": "[parameters('collectedResourceGroup')]",
+          "automationAccountName": "[parameters('collectedAutomationAccount')]"
+        }
+      }
+    },
+    {
+      "condition": "[and(variables('Runbook').Deploy, variables('Schedule').Deploy)]",
+      "name": "[concat(parameters('accountName'), '/', variables('Schedule').LinkGuid)]",
+      "type": "microsoft.automation/automationAccounts/jobSchedules",
+      "apiVersion": "[variables('AutomationApiVersion')]",
+      "location": "[parameters('regionId')]",
+      "tags": {
+        "displayName": "JobSchedule"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts/runbooks/', parameters('accountName'), variables('Runbook').Name)]",
+        "[resourceId('Microsoft.Automation/automationAccounts/schedules/', parameters('accountName'), variables('Schedule').Name)]"
+      ],
+      "properties": {
+        "schedule": {
+          "name": "[variables('Schedule').Name]"
+        },
+        "runbook": {
+          "name": "[variables('Runbook').Name]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "scheduleLinkGuid": {
+      "type": "string",
+      "value": "[parameters('scheduleLinkGuid')]"
+    },
+    "runbookJobGuid": {
+      "type": "string",
+      "value": "[parameters('runbookJobGuid')]"
+    },
+    "scheduleStartTime": {
+      "type": "string",
+      "value": "[variables('Schedule').StartTime]"
+    }
+  }
+}

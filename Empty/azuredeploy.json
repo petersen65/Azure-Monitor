@@ -1,0 +1,73 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "A valid Log Analytics workspace name"
+      }
+    },
+    "accountName": {
+      "type": "string",
+      "metadata": {
+        "description": "A valid Azure Automation account name"
+      }
+    },
+    "workspaceRegionId": {
+      "type": "string",
+      "metadata": {
+        "description": "Region of the Log Analytics workspace"
+      }
+    },
+    "regionId": {
+      "type": "string",
+      "metadata": {
+        "description": "Region of the Azure Automation account"
+      }
+    },
+    "pricingTier": {
+      "type": "string",
+      "metadata": {
+        "description": "Pricing tier of both Log Analytics workspace and Azure Automation account"
+      }
+    }
+  },
+  "variables": {
+    "SolutionName": "MyEmptySolution",
+    "SolutionVersion": "1.0",
+    "SolutionPublisher": "Contoso",
+    "ProductName": "EmptySolution",
+
+    "LogAnalyticsApiVersion": "2015-11-01-preview",
+    "AutomationApiVersion": "2015-10-31"
+  },
+  "resources": [
+    {
+      "name": "[concat(variables('SolutionName'), '[' ,parameters('workspaceName'), ']')]",
+      "location": "[parameters('workspaceRegionId')]",
+      "tags": {
+        "displayName": "Solution"
+      },
+      "type": "Microsoft.OperationsManagement/solutions",
+      "apiVersion": "[variables('LogAnalyticsApiVersion')]",
+      "dependsOn": [
+      ],
+      "properties": {
+        "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "referencedResources": [
+        ],
+        "containedResources": [
+        ]
+      },
+      "plan": {
+        "name": "[concat(variables('SolutionName'), '[' ,parameters('workspaceName'), ']')]",
+        "Version": "[variables('SolutionVersion')]",
+        "product": "[variables('ProductName')]",
+        "publisher": "[variables('SolutionPublisher')]",
+        "promotionCode": ""
+      }
+    }
+  ],
+  "outputs": {}
+}

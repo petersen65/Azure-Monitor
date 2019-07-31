@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Step 1", "Step 1", "{7F07FCE6-22F8-48B6-A366-ADF312A68521}"
+EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Automation", "Automation\Automation.deployproj", "{3EDD9360-254A-42BB-919F-578CA78F5B9A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Step 2", "Step 2", "{2DC9DCA3-A0C2-45D8-812E-DBBB2F198776}"
+	ProjectSection(SolutionItems) = preProject
+		Automation\contoso.com.Passw0rd!.pfx = Automation\contoso.com.Passw0rd!.pfx
+	EndProjectSection
+EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Views", "Views\Views.deployproj", "{F8ED6D43-7085-408C-B175-6190FB2C4ABC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Step 3", "Step 3", "{F66BCAB6-4D49-47B0-8040-D1B2EDD69D7A}"
+	ProjectSection(SolutionItems) = preProject
+		Views\Azure Administration.omsview = Views\Azure Administration.omsview
+	EndProjectSection
+EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Collector", "Collector\Collector.deployproj", "{5D899CF6-BE71-4CDE-A226-E2B9F69888FF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Step 4", "Step 4", "{F00E55A8-7957-4425-82A5-4B5DD34BC44F}"
+EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Empty", "Empty\Empty.deployproj", "{C3ED219E-2A75-4994-8D5B-C7080F93AC1C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3EDD9360-254A-42BB-919F-578CA78F5B9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EDD9360-254A-42BB-919F-578CA78F5B9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EDD9360-254A-42BB-919F-578CA78F5B9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EDD9360-254A-42BB-919F-578CA78F5B9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8ED6D43-7085-408C-B175-6190FB2C4ABC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8ED6D43-7085-408C-B175-6190FB2C4ABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8ED6D43-7085-408C-B175-6190FB2C4ABC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8ED6D43-7085-408C-B175-6190FB2C4ABC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D899CF6-BE71-4CDE-A226-E2B9F69888FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D899CF6-BE71-4CDE-A226-E2B9F69888FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D899CF6-BE71-4CDE-A226-E2B9F69888FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D899CF6-BE71-4CDE-A226-E2B9F69888FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3ED219E-2A75-4994-8D5B-C7080F93AC1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3ED219E-2A75-4994-8D5B-C7080F93AC1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3ED219E-2A75-4994-8D5B-C7080F93AC1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3ED219E-2A75-4994-8D5B-C7080F93AC1C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3EDD9360-254A-42BB-919F-578CA78F5B9A} = {2DC9DCA3-A0C2-45D8-812E-DBBB2F198776}
+		{F8ED6D43-7085-408C-B175-6190FB2C4ABC} = {F66BCAB6-4D49-47B0-8040-D1B2EDD69D7A}
+		{5D899CF6-BE71-4CDE-A226-E2B9F69888FF} = {F00E55A8-7957-4425-82A5-4B5DD34BC44F}
+		{C3ED219E-2A75-4994-8D5B-C7080F93AC1C} = {7F07FCE6-22F8-48B6-A366-ADF312A68521}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8AB8DECB-CC91-45AC-9400-C7F0DA2295F0}
+	EndGlobalSection
+EndGlobal
