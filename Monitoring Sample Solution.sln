@@ -33,6 +33,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Queries", "Queries", "{E2AD
 		Windows Service Stopped.txt = Windows Service Stopped.txt
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{9C37157A-F28F-40E5-A8F5-EBE1B1752A14}"
+	ProjectSection(SolutionItems) = preProject
+		Azure Log Analytics.pdf = Azure Log Analytics.pdf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
