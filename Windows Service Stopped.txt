@@ -1,0 +1,19 @@
+// Suitable for generating an alert, e.g. look every 60min whether a specific service changed from running to stopped
+ConfigurationChange
+| where ConfigChangeType == "WindowsServices" 
+    and SvcState == "Stopped" 
+    and SvcPreviousState == "Running" 
+    and SvcStartupType == "Auto" 
+    and SvcName == "TrustedInstaller"
+
+// TBD
+ConfigurationData
+| where ConfigDataType == "WindowsServices" and SvcName == "wuauserv" 
+| summarize Last = max(TimeGenerated) by Computer
+
+// TBD
+ConfigurationData
+| where SvcName == "wuauserv"
+| project Computer, SvcName, SvcState,TimeGenerated
+| where SvcState in ("Running", "Stopped")
+| sort by TimeGenerated desc

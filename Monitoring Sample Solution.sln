@@ -25,6 +25,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Step 4", "Step 4", "{F00E55
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Empty", "Empty\Empty.deployproj", "{C3ED219E-2A75-4994-8D5B-C7080F93AC1C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Queries", "Queries", "{E2AD385E-A685-41D6-99F1-F5B89A58BAB5}"
+	ProjectSection(SolutionItems) = preProject
+		All Virtual Machines.txt = All Virtual Machines.txt
+		Azure Backup Status.txt = Azure Backup Status.txt
+		KQL Introduction.txt = KQL Introduction.txt
+		Windows Service Stopped.txt = Windows Service Stopped.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

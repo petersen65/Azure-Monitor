@@ -1,0 +1,101 @@
+// Each new programming or query language has to start with "Hello, World!"
+print Welcome = "Hello, World!"
+
+// Search Event table with or without command separator
+// The pipe (|) character separates commands, so the output of the first one in the input of the following command
+Event 
+| search "error"
+
+search in (Event) "error"
+
+// Log Analytics automatically scopes results by:
+// Time range: By default, queries are limited to the last 24 hours.
+// Number of results: Results are limited to maximum of 10,000 records.
+Event
+
+// Filter with "+" and "-" icons from the table after selecting ">"
+// Filter with table element on table column header
+// To Sort by a column, click the column title: one click sorts in ascending order while a second click will sort in descending order
+// To Group results by a specific column, drag the column header above the other columns
+// To select the columns to show, click the Columns button
+// To select a specific time range, select another value through the time picker
+
+// You can Save either the entire query page, or a single query as a function
+// Log Analytics queries are always saved to a selected workspace, and shared with other users of that workspace
+// Load queries by using "Query Explorer"
+// Access query history of the last 30 days by selecting "Sample Queries" and then "History"
+// Share a link: The query itself can be shared as a link which can then be sent and executed by other users that have access to the same workspace
+
+
+// Table-based Queries
+// Azure Monitor organizes log data in tables, each composed of multiple columns
+
+// The query shown below returns 10 results from the SecurityEvent table, in no specific order
+SecurityEvent
+| take 10
+
+// Search queries
+// Search queries are less structured, and generally more suited for finding records that include a specific value in any of their columns
+
+// This query searches the SecurityEvent table for records that contain the phrase "Cryptographic"
+search in (SecurityEvent) "Cryptographic"
+| take 10
+
+// Sort and Top
+
+SecurityEvent	
+| sort by TimeGenerated desc // will return upto 10000 records for a given time range!
+
+SecurityEvent
+| top 10 by TimeGenerated asc nulls last
+
+// Where: filtering on a condition
+
+SecurityEvent
+| where Level == 8 
+
+SecurityEvent
+| where Level == 8 and EventID == 4672
+
+SecurityEvent 
+| where toint(Level) >= 2 // Level is of type string and must casted for compare operations
+
+SecurityEvent
+| where TimeGenerated > ago(30m) // Time Range set in query
+| where toint(Level) >= 4
+
+// Project and Extend: select and compute columns
+
+SecurityEvent
+| top 10 by TimeGenerated asc
+| extend Time = format_datetime(TimeGenerated, 'dd.MM.yy [HH:mm:ss]') // https://docs.microsoft.com/en-us/azure/kusto/query/format-datetimefunction
+| project Computer, 
+          Time, 
+          EventDetails = Activity, 
+          EventCode = substring(Activity, 0, 4) // Use project to rename columns and define new ones
+| sort by Time asc 
+
+// Summarize: aggregate groups of rows
+// Use summarize to identify groups of records, according to one or more columns, and apply aggregations to them
+
+Perf
+| where TimeGenerated > ago(1h)
+| summarize Count = count() by ObjectName // Group records from Perf table by ObjectName and count the number of records in each group
+| sort by ObjectName asc 
+
+Perf
+| where TimeGenerated > ago(1h)
+| summarize Count = count() by ObjectName, CounterName // Group records from Perf table first by ObjectName, then by CounterName, and count the number of records in each group
+| sort by ObjectName asc 
+
+Perf
+| where TimeGenerated > ago(1h)
+| summarize Average = replace(",", "", tostring(round(avg(CounterValue), 1))) 
+    by Computer, CounterName // Calculate average value of CounterValue per group of records
+
+Perf 
+| where TimeGenerated > ago(14d)
+| where CounterName contains "Available MBytes" and Computer contains "-" 
+| summarize AvailableGBytes = round(avg(CounterValue / 1024), 1) 
+    by Time = format_datetime(bin(TimeGenerated, 1d), 'dd.MM.yy'), Computer
+| sort by Time asc 

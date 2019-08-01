@@ -1,0 +1,6 @@
+AzureDiagnostics
+| where TimeGenerated > ago(1d) 
+| where Category == "AzureBackupReport" and OperationName == "Job" and JobOperation_s == "Backup" 
+| where ProtectedServerUniqueId_s != "" 
+| extend VirtualMachine = split(ProtectedServerUniqueId_s, ';')[4], Time = format_datetime(TimeGenerated, "dd.MM.yy [HH:mm:ss]")  
+| project Time, VirtualMachine, JobId = JobUniqueId_g, Status = JobStatus_s, Code = JobFailureCode_s
